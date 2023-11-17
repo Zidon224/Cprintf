@@ -3,11 +3,13 @@
 
 int main()
 {
-    ANSI_RGB_FG(255, 67, 0);
     cprintf("██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░\n");
-    ANSI_RST();
-
-    ANSI_XTERM_FG(62);
-    cprintf("Colored text");
-    ANSI_RST();
+    cprintf("#rStuff#x\n");
+    cprintf("#gStuff#x\n");
+    cprintf("#yStuff#x\n");
+    cprintf("#bStuff#x\n");
+    cprintf("#mStuff#x\n");
+    cprintf("#cStuff#x\n");
+    cprintf("#wStuff#x\n");
+    cprintf("#dStuff#x\n");
 }
