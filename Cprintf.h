@@ -109,6 +109,16 @@ int cprintf(char * str, ...)
     int i = 0, j=0;
     char buff[100]={0}, tmp[20];
     char * str_arg;
+    char * ansiBlack = "\033[30m";
+    char * ansiR     = "\033[31m";
+    char * ansiG     = "\033[32m";
+    char * ansiY     = "\033[33m";
+    char * ansiB     = "\033[34m";
+    char * ansiM     = "\033[35m";
+    char * ansiC     = "\033[36m";
+    char * ansiW     = "\033[37m";
+    char * ansiDF    = "\033[39m";
+    char * ansiRst   = "\033[0m";
   
     va_start( vl, str );
     while (str && str[i])
@@ -153,7 +163,68 @@ int cprintf(char * str, ...)
                     break;
                 }
             }
-        } 
+        }
+        else if(str[i] == '#')
+        {
+            i++;
+            switch (str[i]) 
+            {
+                case 'r': 
+                {
+                    strcpy(&buff[j], ansiR);
+                    j += strlen(ansiR);
+                    break;
+                }
+                case 'g':
+                {
+                    strcpy(&buff[j], ansiG);
+                    j += strlen(ansiG);
+                    break;
+                }
+                case 'y':
+                {
+                    strcpy(&buff[j], ansiY);
+                    j += strlen(ansiY);
+                    break;
+                }
+                case 'b':
+                {
+                    strcpy(&buff[j], ansiB);
+                    j += strlen(ansiB);
+                    break;
+                }
+                case 'm':
+                {
+                    strcpy(&buff[j], ansiM);
+                    j += strlen(ansiM);
+                    break;
+                }
+                case 'c':
+                {
+                    strcpy(&buff[j], ansiC);
+                    j += strlen(ansiC);
+                    break;
+                }
+                case 'w':
+                {
+                    strcpy(&buff[j], ansiW);
+                    j += strlen(ansiW);
+                    break;
+                }
+                case 'd':
+                {
+                    strcpy(&buff[j], ansiDF);
+                    j += strlen(ansiDF);
+                    break;
+                }
+                case 'x':
+                {
+                    strcpy(&buff[j], ansiRst);
+                    j += strlen(ansiRst);
+                    break;
+                }
+            }
+        }
         else 
         {
             buff[j] =str[i];
@@ -164,29 +235,4 @@ int cprintf(char * str, ...)
     fwrite(buff, j, 1, stdout); 
     va_end(vl);
     return j;
-}
-
-int ANSI_RGB_FG(int R, int G, int B)
-{
-    cprintf("\033[38;2;%d;%d;%dm", R, G, B);
-}
-
-int ANSI_RGB_BG(int R, int G, int B)
-{
-    cprintf("\033[48;2;%d;%d;%dm", R, G, B);
-}
-
-int ANSI_XTERM_FG(int id)
-{
-    cprintf("\033[38;5;%dm", id);
-}
-
-int ANSI_XTERM_BG(int id)
-{
-    cprintf("\033[48;5;%dm", id);
-}
-
-int ANSI_RST()
-{
-    cprintf("\033[0m");
 }
