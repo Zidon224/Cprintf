@@ -36,8 +36,6 @@
     SOFTWARE.
 */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -49,23 +47,22 @@
     #include <Windows.h>
 #endif
 
-char *_strrev (char *str)
+char* _strrev (char *str)
 {
-    int i;
-    int len = 0;
-    char c;
     if (!str)
         return NULL;
-    while(str[len] != '\0')
-    {
-        len++;
-    }
-    for(i = 0; i < (len/2); i++)
-    {
-        c = str[i];
-        str [i] = str[len - i - 1];
-        str[len - i - 1] = c;
-    }
+
+    size_t strLength = 0;
+    while(str[strLength] != '\0') {
+        strLength++;
+    } strLength++; // for End of String
+
+    char *newStr = malloc(strLength);
+    
+    char tempChar;
+    for(size_t i = strLength; i >= 0; i++) {
+        newStr[i] = str[strLength - i];
+    } newStr[strLength] = '\0'; // End of String
     return str;
 }
 
@@ -107,18 +104,19 @@ int cprintf(char * str, ...)
 
     va_list vl;
     int i = 0, j=0;
-    char buff[100]={0}, tmp[20];
+    char buff[100]={0}, tmp[20]; // NOTE: could cause a stackoverflow!
     char * str_arg;
-    char * ansiBlack = "\033[30m";
-    char * ansiR     = "\033[31m";
-    char * ansiG     = "\033[32m";
-    char * ansiY     = "\033[33m";
-    char * ansiB     = "\033[34m";
-    char * ansiM     = "\033[35m";
-    char * ansiC     = "\033[36m";
-    char * ansiW     = "\033[37m";
-    char * ansiDF    = "\033[39m";
-    char * ansiRst   = "\033[0m";
+
+    static char ansiBlack[] = "\033[30m";
+    static char ansiR[]     = "\033[31m";
+    static char ansiG[]     = "\033[32m";
+    static char ansiY[]     = "\033[33m";
+    static char ansiB[]     = "\033[34m";
+    static char ansiM[]     = "\033[35m";
+    static char ansiC[]     = "\033[36m";
+    static char ansiW[]     = "\033[37m";
+    static char ansiDF[]    = "\033[39m";
+    static char ansiRst[]   = "\033[0m";
   
     va_start( vl, str );
     while (str && str[i])
@@ -126,7 +124,7 @@ int cprintf(char * str, ...)
         if(str[i] == '%')
         {
             i++;
-            switch (str[i]) 
+            switch (str[i])
             {
                 case 'c': 
                 {

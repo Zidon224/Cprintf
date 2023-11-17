@@ -3,7 +3,11 @@
 
 int main()
 {
-    cprintf("██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░\n");
+    char *string = "Test!";
+    _strrev(string);
+    printf("%s", string);
+
+    /*cprintf("██████████████████░░░░░░░░░░░░░░░░░░░░░░░░░\n");
     cprintf("#rStuff#x\n");
     cprintf("#gStuff#x\n");
     cprintf("#yStuff#x\n");
@@ -11,5 +15,5 @@ int main()
     cprintf("#mStuff#x\n");
     cprintf("#cStuff#x\n");
     cprintf("#wStuff#x\n");
-    cprintf("#dStuff#x\n");
+    cprintf("#dStuff#x\n");*/
 }
