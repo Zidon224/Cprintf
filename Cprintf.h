@@ -41,6 +41,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
@@ -85,18 +86,33 @@
 #define ansiBGBrightWhite   "\033[107m"
 #define ansiRst             "\033[0m"
 
-#define NARG_(_15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, N, ...) N
-#define NARG(...) NARG_(__VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
-#define PASTE(fR, fG, fB, bR, bG, bB) fR ## fG ## fB ## bR, bG, bB
-#define XPASTE(fR, fG, fB, bR, bG, bB) PASTE(fR, fG, fB, bR, bG, bB)
-
 
 //#define octal       "\033["
 //#define ansiEnd     "m";
 //#define ansiBrightR "\033[91m"
 
+//Foreground
+typedef struct foreground
+{
+    //Uint8 bc let's keep the memory usage low :) also color values over 255 are ilegal!
+    uint8_t stdColors; //For standard colors
+    uint8_t XTerm; //255 color support (XTerm coloring)
+    uint8_t r; // r, g, b support
+    uint8_t g;
+    uint8_t b;
+}frg;
+frg fg;
 
-
+//Background
+typedef struct background
+{
+    uint8_t stdColors; //For standard colors
+    uint8_t XTerm; //255 color support (XTerm coloring)
+    uint8_t r; // r, g, b support
+    uint8_t g;
+    uint8_t b;
+}bckg;
+bckg bg;
 
 
 char* _strrev (char *str)
@@ -454,56 +470,7 @@ int cprintf(char * str, ...)
     return j;
 }
 
-int ansi_STD_FG_Color(int FGcolorCode)
+int ansiColorFG()
 {
-    cprintf("\033[%dm", FGcolorCode);
+    cprintf("\033[%dm", fg.stdColors);
 }
-
-int ansi_STD_BG_Color(int BGcolorCode)
-{
-    cprintf("\033[%dm", BGcolorCode);
-}
-
-int ansi_STD_FG_BG_Color(int BGcolorCode, int FGcolorCode)
-{
-    cprintf("\033[%d;%dm", FGcolorCode, BGcolorCode);
-}
-
-int ansi_FG_RGB(int R, int G, int B)
-{
-    cprintf("\033[38;2;%d;%d;%dm", R, G, B);
-}
-
-int ansi_BG_RGB(int R, int G, int B)
-{
-    cprintf("\033[48;2;%d;%d;%dm", R, G, B);
-}
-
-int ansi_FG_BG_RGB(int fR, int fG, int fB, int bR, int bB, int bG)
-{
-    cprintf("\033[38;2;%d;%d;%d;48;2;%d;%d;%dm", fR, fG, fB, bR, bG, bB);
-}
-
-int ansi_XTERM_FG(int XtermId)
-{
-    cprintf("\033[38;5;%d", XtermId);
-}
-
-int ansi_XTERM_BG(int XtermId)
-{
-    cprintf("\033[48;5;%d", XtermId);
-}
-
-int ansi_XTERM_FG_BG(int fgXtermId, int bgXtermId)
-{
-    cprintf("\033[38;5;%d;48;5;%d", fgXtermId, bgXtermId);
-}
-
-int ANSIReset()
-{
-    cprintf("\033[0m");
-}
-
-#define foo2(fR, fG, fB, bR, bG, bB) ansi_FG_BG_RGB((fR, fG, fB), (bR, bG, bB))
-#define foo1(x) foo2(x,0)
-#define ansiRGB(...) XPASTE(ansi_FG_BG_RGB, NARG(__VA_ARGS__))(__VA_ARGS__)
