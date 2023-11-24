@@ -6,11 +6,15 @@
     Features:
     # Same known features as default printf
     # Unicode charset support (UTF-8)
-    # Ansi escape codes (RGB support, XTerm 255 color array, Standard colors will come up soon)
+    # Ansi escape codes:
+        RGB support, 
+        XTerm 255 color array, 
+        Standard colors
 
     Changelogs:
 
     - 16.11.2023: First publish
+    - 24.11.2023: New comits
 */
 /*
     MIT License
@@ -36,12 +40,12 @@
     SOFTWARE.
 */
 
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdint.h>
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
@@ -52,6 +56,7 @@
 
 
 
+//Predefined default strings for color flag detections
 #define ansiR               "\033[31m"
 #define ansiG               "\033[32m"
 #define ansiY               "\033[33m"
@@ -85,52 +90,29 @@
 #define ansiBGBrightCyan    "\033[106m"
 #define ansiBGBrightWhite   "\033[107m"
 #define ansiRst             "\033[0m"
+#define ansiFullCtrl        "\033["
 
 
-//#define octal       "\033["
-//#define ansiEnd     "m";
-//#define ansiBrightR "\033[91m"
 
-//Foreground
-typedef struct foreground
+
+
+char *_strrev (char *str)
 {
-    //Uint8 bc let's keep the memory usage low :) also color values over 255 are ilegal!
-    uint8_t stdColors; //For standard colors
-    uint8_t XTerm; //255 color support (XTerm coloring)
-    uint8_t r; // r, g, b support
-    uint8_t g;
-    uint8_t b;
-}frg;
-frg fg;
-
-//Background
-typedef struct background
-{
-    uint8_t stdColors; //For standard colors
-    uint8_t XTerm; //255 color support (XTerm coloring)
-    uint8_t r; // r, g, b support
-    uint8_t g;
-    uint8_t b;
-}bckg;
-bckg bg;
-
-
-char* _strrev (char *str)
-{
+    int i;
+    int len = 0;
+    char c;
     if (!str)
         return NULL;
-
-    size_t strLength = 0;
-    while(str[strLength] != '\0') {
-        strLength++;
-    } strLength++; // for End of String
-
-    char *newStr = (char*)malloc(strLength);
-    
-    char tempChar;
-    for(size_t i = strLength; i >= 0; i++) {
-        newStr[i] = str[strLength - i];
-    } newStr[strLength] = '\0'; // End of String
+    while(str[len] != '\0')
+    {
+        len++;
+    }
+    for(i = 0; i < (len/2); i++)
+    {
+        c = str[i];
+        str [i] = str[len - i - 1];
+        str[len - i - 1] = c;
+    }
     return str;
 }
 
@@ -172,7 +154,7 @@ int cprintf(char * str, ...)
 
     va_list vl;
     int i = 0, j=0;
-    char buff[100]={0}, tmp[20]; // NOTE: could cause a stackoverflow!
+    char buff[100]={0}, tmp[20];
     char * str_arg;
   
     va_start( vl, str );
@@ -181,7 +163,7 @@ int cprintf(char * str, ...)
         if(str[i] == '%')
         {
             i++;
-            switch (str[i])
+            switch (str[i]) 
             {
                 case 'c': 
                 {
@@ -219,258 +201,294 @@ int cprintf(char * str, ...)
                 }
             }
         }
-        else if(str[i] == '#')
-        {
-            i++;
-            switch (str[i]) 
+        //Ansi flags
+            else if(str[i] == '#')
             {
-                case 'r': 
+                i++;
+                switch (str[i]) 
                 {
-                    if(isupper(str[i]))
+                    case 'r': 
+                    {
+                        strcpy(&buff[j], ansiR);
+                        j += strlen(ansiR);
+                        break;
+                    }
+                    case 'g':
+                    {
+                        strcpy(&buff[j], ansiG);
+                        j += strlen(ansiG);
+                        break;
+                    }
+                    case 'y':
+                    {
+                        strcpy(&buff[j], ansiY);
+                        j += strlen(ansiY);
+                        break;
+                    }
+                    case 'b':
+                    {
+                        strcpy(&buff[j], ansiB);
+                        j += strlen(ansiB);
+                        break;
+                    }
+                    case 'm':
                     {
                         strcpy(&buff[j], ansiM);
                         j += strlen(ansiM);
+                        break;
                     }
-                    
-                        strcpy(&buff[j], ansiR);
-                        j += strlen(ansiR);
-                    
-                    break;
-                }
-                case 'g':
-                {
-                    strcpy(&buff[j], ansiG);
-                    j += strlen(ansiG);
-                    break;
-                }
-                case 'y':
-                {
-                    strcpy(&buff[j], ansiY);
-                    j += strlen(ansiY);
-                    break;
-                }
-                case 'b':
-                {
-                    strcpy(&buff[j], ansiB);
-                    j += strlen(ansiB);
-                    break;
-                }
-                case 'm':
-                {
-                    strcpy(&buff[j], ansiM);
-                    j += strlen(ansiM);
-                    break;
-                }
-                case 'c':
-                {
-                    strcpy(&buff[j], ansiC);
-                    j += strlen(ansiC);
-                    break;
-                }
-                case 'w':
-                {
-                    strcpy(&buff[j], ansiW);
-                    j += strlen(ansiW);
-                    break;
-                }
-                case 'd':
-                {
-                    strcpy(&buff[j], ansiDF);
-                    j += strlen(ansiDF);
-                    break;
-                }
-                case 'x':
-                {
-                    strcpy(&buff[j], ansiRst);
-                    j += strlen(ansiRst);
-                    break;
+                    case 'c':
+                    {
+                        strcpy(&buff[j], ansiC);
+                        j += strlen(ansiC);
+                        break;
+                    }
+                    case 'w':
+                    {
+                        strcpy(&buff[j], ansiW);
+                        j += strlen(ansiW);
+                        break;
+                    }
+                    case 'd':
+                    {
+                        strcpy(&buff[j], ansiDF);
+                        j += strlen(ansiDF);
+                        break;
+                    }
+                    case 'x':
+                    {
+                        strcpy(&buff[j], ansiRst);
+                        j += strlen(ansiRst);
+                        break;
+                    }
                 }
             }
-        }
-        else if(str[i] == '$')
-        {
-            i++;
-            switch (str[i]) 
+            else if(str[i] == '$')
             {
-                case 'r': 
+                i++;
+                switch (str[i]) 
                 {
-                    strcpy(&buff[j], ansiBR);
-                    j += strlen(ansiBR);
-                    break;
-                }
-                case 'g':
-                {
-                    strcpy(&buff[j], ansiBG);
-                    j += strlen(ansiBG);
-                    break;
-                }
-                case 'y':
-                {
-                    strcpy(&buff[j], ansiBY);
-                    j += strlen(ansiBY);
-                    break;
-                }
-                case 'b':
-                {
-                    strcpy(&buff[j], ansiBB);
-                    j += strlen(ansiBB);
-                    break;
-                }
-                case 'm':
-                {
-                    strcpy(&buff[j], ansiBM);
-                    j += strlen(ansiBM);
-                    break;
-                }
-                case 'c':
-                {
-                    strcpy(&buff[j], ansiBC);
-                    j += strlen(ansiBC);
-                    break;
-                }
-                case 'w':
-                {
-                    strcpy(&buff[j], ansiBW);
-                    j += strlen(ansiBW);
-                    break;
-                }
-                case 'd':
-                {
-                    strcpy(&buff[j], ansiBDF);
-                    j += strlen(ansiBDF);
-                    break;
-                }
-                case 'x':
-                {
-                    strcpy(&buff[j], ansiRst);
-                    j += strlen(ansiRst);
-                    break;
+                    case 'r': 
+                    {
+                        strcpy(&buff[j], ansiBR);
+                        j += strlen(ansiBR);
+                        break;
+                    }
+                    case 'g':
+                    {
+                        strcpy(&buff[j], ansiBG);
+                        j += strlen(ansiBG);
+                        break;
+                    }
+                    case 'y':
+                    {
+                        strcpy(&buff[j], ansiBY);
+                        j += strlen(ansiBY);
+                        break;
+                    }
+                    case 'b':
+                    {
+                        strcpy(&buff[j], ansiBB);
+                        j += strlen(ansiBB);
+                        break;
+                    }
+                    case 'm':
+                    {
+                        strcpy(&buff[j], ansiBM);
+                        j += strlen(ansiBM);
+                        break;
+                    }
+                    case 'c':
+                    {
+                        strcpy(&buff[j], ansiBC);
+                        j += strlen(ansiBC);
+                        break;
+                    }
+                    case 'w':
+                    {
+                        strcpy(&buff[j], ansiBW);
+                        j += strlen(ansiBW);
+                        break;
+                    }
+                    case 'd':
+                    {
+                        strcpy(&buff[j], ansiBDF);
+                        j += strlen(ansiBDF);
+                        break;
+                    }
+                    case 'x':
+                    {
+                        strcpy(&buff[j], ansiRst);
+                        j += strlen(ansiRst);
+                        break;
+                    }
                 }
             }
-        }
-        else if(str[i] == '&')
-        {
-            i++;
-            switch (str[i]) 
+            else if(str[i] == '&')
             {
-                case 'r': 
+                i++;
+                switch (str[i]) 
                 {
-                    strcpy(&buff[j], ansiFGBrightRed);
-                    j += strlen(ansiFGBrightRed);
-                    break;
-                }
-                case 'g':
-                {
-                    strcpy(&buff[j], ansiFGBrightGreen);
-                    j += strlen(ansiFGBrightGreen);
-                    break;
-                }
-                case 'y':
-                {
-                    strcpy(&buff[j], ansiFGBrightYellow);
-                    j += strlen(ansiFGBrightYellow);
-                    break;
-                }
-                case 'b':
-                {
-                    strcpy(&buff[j], ansiFGBrightBlue);
-                    j += strlen(ansiFGBrightBlue);
-                    break;
-                }
-                case 'm':
-                {
-                    strcpy(&buff[j], ansiFGBrightMagenta);
-                    j += strlen(ansiFGBrightMagenta);
-                    break;
-                }
-                case 'c':
-                {
-                    strcpy(&buff[j], ansiFGBrightCyan);
-                    j += strlen(ansiFGBrightCyan);
-                    break;
-                }
-                case 'w':
-                {
-                    strcpy(&buff[j], ansiFGBrightWhite);
-                    j += strlen(ansiFGBrightWhite);
-                    break;
-                }
-                case 'x':
-                {
-                    strcpy(&buff[j], ansiRst);
-                    j += strlen(ansiRst);
-                    break;
+                    case 'r': 
+                    {
+                        strcpy(&buff[j], ansiFGBrightRed);
+                        j += strlen(ansiFGBrightRed);
+                       break;
+                    }
+                    case 'g':
+                    {
+                        strcpy(&buff[j], ansiFGBrightGreen);
+                        j += strlen(ansiFGBrightGreen);
+                        break;
+                    }
+                    case 'y':
+                    {
+                        strcpy(&buff[j], ansiFGBrightYellow);
+                        j += strlen(ansiFGBrightYellow);
+                        break;
+                    }
+                    case 'b':
+                    {
+                        strcpy(&buff[j], ansiFGBrightBlue);
+                        j += strlen(ansiFGBrightBlue);
+                        break;
+                    }
+                    case 'm':
+                    {
+                        strcpy(&buff[j], ansiFGBrightMagenta);
+                        j += strlen(ansiFGBrightMagenta);
+                        break;
+                    }
+                    case 'c':
+                    {
+                        strcpy(&buff[j], ansiFGBrightCyan);
+                        j += strlen(ansiFGBrightCyan);
+                        break;
+                    }
+                    case 'w':
+                    {
+                        strcpy(&buff[j], ansiFGBrightWhite);
+                        j += strlen(ansiFGBrightWhite);
+                        break;
+                    }
+                    case 'x':
+                    {
+                        strcpy(&buff[j], ansiRst);
+                        j += strlen(ansiRst);
+                        break;
+                    }
                 }
             }
-        }
-        else if(str[i] == '@')
-        {
-            i++;
-            switch (str[i]) 
+            else if(str[i] == '@')
             {
-                case 'r': 
+                i++;
+                switch (str[i]) 
                 {
-                    strcpy(&buff[j], ansiBGBrightRed);
-                    j += strlen(ansiBGBrightRed);
-                    break;
-                }
-                case 'g':
-                {
-                    strcpy(&buff[j], ansiBGBrightGreen);
-                    j += strlen(ansiBGBrightGreen);
-                    break;
-                }
-                case 'y':
-                {
-                    strcpy(&buff[j], ansiBGBrightYellow);
-                    j += strlen(ansiBGBrightYellow);
-                    break;
-                }
-                case 'b':
-                {
-                    strcpy(&buff[j], ansiBGBrightBlue);
-                    j += strlen(ansiBGBrightBlue);
-                    break;
-                }
-                case 'm':
-                {
-                    strcpy(&buff[j], ansiBGBrightMagenta);
-                    j += strlen(ansiBGBrightMagenta);
-                    break;
-                }
-                case 'c':
-                {
-                    strcpy(&buff[j], ansiBGBrightCyan);
-                    j += strlen(ansiBGBrightCyan);
-                    break;
-                }
-                case 'w':
-                {
-                    strcpy(&buff[j], ansiBGBrightWhite);
-                    j += strlen(ansiBGBrightWhite);
-                    break;
-                }
-                case 'x':
-                {
-                    strcpy(&buff[j], ansiRst);
-                    j += strlen(ansiRst);
-                    break;
+                    case 'r': 
+                    {
+                        strcpy(&buff[j], ansiBGBrightRed);
+                        j += strlen(ansiBGBrightRed);
+                        break;
+                    }
+                    case 'g':
+                    {
+                        strcpy(&buff[j], ansiBGBrightGreen);
+                        j += strlen(ansiBGBrightGreen);
+                        break;
+                    }
+                    case 'y':
+                    {
+                        strcpy(&buff[j], ansiBGBrightYellow);
+                        j += strlen(ansiBGBrightYellow);
+                        break;
+                    }
+                    case 'b':
+                    {
+                        strcpy(&buff[j], ansiBGBrightBlue);
+                        j += strlen(ansiBGBrightBlue);
+                        break;
+                    }
+                    case 'm':
+                    {
+                        strcpy(&buff[j], ansiBGBrightMagenta);
+                        j += strlen(ansiBGBrightMagenta);
+                        break;
+                    }
+                    case 'c':
+                    {
+                        strcpy(&buff[j], ansiBGBrightCyan);
+                        j += strlen(ansiBGBrightCyan);
+                        break;
+                    }
+                    case 'w':
+                    {
+                        strcpy(&buff[j], ansiBGBrightWhite);
+                        j += strlen(ansiBGBrightWhite);
+                        break;
+                    }
+                    case 'x':
+                    {
+                        strcpy(&buff[j], ansiRst);
+                        j += strlen(ansiRst);
+                        break;
+                    }
                 }
             }
-        }
-        else 
-        {
-            buff[j] =str[i];
-            j++;
-        }
-        i++;
+            else 
+            {
+                buff[j] =str[i];
+                j++;
+            }
+            i++;
     }
     fwrite(buff, j, 1, stdout); 
     va_end(vl);
     return j;
 }
 
-int ansiColorFG()
+//custom control functions
+
+int ansiSTDColorFG(int fgColorCode)
 {
-    cprintf("\033[%dm", fg.stdColors);
+    cprintf("\033[%dm", fgColorCode);
+}
+
+int ansiSTDColorFG_BG(int fgColorCode, int bgColorCode)
+{
+    cprintf("\033[%d;%dm", fgColorCode, bgColorCode);
+}
+
+int ansiXtermFG(int fgColorCode)
+{
+    cprintf("\033[38;5;%dm", fgColorCode);
+}
+
+int ansiXtermBG(int BgColorCode)
+{
+    cprintf("\033[48;5;%dm");
+}
+
+int ansiXtermFG_BG(int fgColorCode, int bgColorCode)
+{
+    cprintf("\033[38;5;%d;48;5;%dm", fgColorCode, bgColorCode);
+}
+
+int ansiRGB_FG(int r, int g, int b)
+{
+    cprintf("\033[38;2;%d;%d;%dm", r, g, b);
+}
+
+int ansiRGB_BG(int r, int g, int b)
+{
+    cprintf("\033[48;2;%d;%d;%dm", r, g, b);
+}
+
+int ansiRGB_FG_BG(int fR, int fG, int fB, int bR, int bG, int bB)
+{
+    cprintf("\033[38;2;%d;%d;%d;48;2;%d;%d;%dm", fR, fG, fB, bR, bG, bB);
+}
+
+int ansiReset()
+{
+    cprintf("\033[0m");
 }
